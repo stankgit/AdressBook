@@ -11,11 +11,118 @@ using namespace std;
 
 struct przyjaciel
 {
-    int id;
+    int id, iduzytkownika;
     string imie, nazwisko, adres, numer;
 };
 //------------------------------------------------------------------------
-int wyswietl_ksiazke()
+
+struct uzytkownik
+{
+    int iduz;
+    string login, haslo;
+};
+//------------------------------------------------------------------------
+
+void przypisanie_uz(vector<uzytkownik>& uzytkownicy)
+{
+    string idd,loginn,hasloo;
+    fstream plik;
+    plik.open("Uzytkownicy.txt", ios::in);
+    int nr=0;
+
+    while(getline(plik,idd,'.')&&getline(plik,loginn,'|')&&getline(plik,hasloo))
+    {
+        uzytkownicy.push_back(uzytkownik());
+        uzytkownicy[nr].iduz=stoi(idd);
+        uzytkownicy[nr].login=loginn;
+        uzytkownicy[nr].haslo=hasloo;
+        nr++;
+    }
+}
+//------------------------------------------------------------------------
+
+void rejestracja(vector<uzytkownik>& uzytkownicy, int ilosc)
+{
+
+    int idd;
+
+    if (ilosc!=0)
+    {
+        idd=uzytkownicy[ilosc-1].iduz+1;
+    }
+    else
+    {
+        idd=1;
+    }
+
+    string login,haslo;
+
+    do
+    {
+        cout<<"Login: ";
+        int zmienna=1;
+        cin>>login;
+        for (int x=0; x<ilosc; x++)
+        {
+            if(uzytkownicy[x].login==login)
+            {
+                cout<<"Uzytkownik o podanej nazwie juz istnieje"<<endl;
+                zmienna=0;
+                break;
+            }
+        }
+        if (zmienna==1) break;
+    }
+    while(true);
+
+
+    cout<<"Password: ";
+    cin>>haslo;
+
+    fstream plik;
+    plik.open("Uzytkownicy.txt", ios::out | ios::app);
+    if (ilosc!=0) plik<<endl;
+    plik<<idd<<"."<<login<<"|"<<haslo;
+    plik.close();
+
+
+}
+//------------------------------------------------------------------------
+
+int logowanie(vector<uzytkownik>& uzytkownicy, int ilosc)
+{
+    int id;
+
+    string login,haslo;
+    cout<<"Login: ";
+    cin>>login;
+    cout<<"Haslo: ";
+    cin>>haslo;
+    int zmienna=1;
+
+    for (int x=0; x<ilosc; x++)
+    {
+        if((uzytkownicy[x].login==login)&&(uzytkownicy[x].haslo==haslo))
+        {
+            id=uzytkownicy[x].iduz;
+            zmienna=0;
+            break;
+        }
+    }
+    if (zmienna!=0)
+    {
+        cout<<"Login lub haslo nieprawidlowe!"<<endl<<"Nacisnij dowolony klawisz aby wrocic do glownego menu";
+        getchar();getchar();
+        return -1;
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
+    cout<< "Witaj "<<login<<" w Twojej ksiazce adresowej. Nacisnij dowolny klawisz zeby wyswietlic menu...";
+    getchar();getchar();
+    return id;
+
+}
+//------------------------------------------------------------------------
+int wyswietl_ksiazke(vector<przyjaciel>& kontakty, int iduz)
 {
     system("CLS");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),11);
@@ -25,6 +132,18 @@ int wyswietl_ksiazke()
     cout<<"------------------------------------------------"<<endl;
     cout<<"  IMIE  |  NAZWISKO  |  ADRES  |  NR TELEFONU"<<endl;
     cout<<"------------------------------------------------"<<endl;
+
+    for (int i=0; i<kontakty.size(); i++)
+    {
+        cout<<kontakty[i].id<<"."<<kontakty[i].iduzytkownika<<"|"<<kontakty[i].imie<<"|"<<kontakty[i].nazwisko<<"|"<<kontakty[i].adres<<"|"<<kontakty[i].numer<<"|"<<endl;
+    }
+    cout << "------------------------------------------------"<<endl<<endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
+}
+//------------------------------------------------------------------------
+int oblicz_ilosc()
+{
     fstream plik;
     string linia;
     plik.open("Kontakty.txt", ios::in);
@@ -32,54 +151,104 @@ int wyswietl_ksiazke()
 
     while(getline(plik,linia))
     {
-        cout<<linia<<endl;
         nr_linii++;
     }
 
     plik.close();
 
-    cout << "------------------------------------------------"<<endl<<endl;
-
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
     return nr_linii-1;
 }
-
-
 //------------------------------------------------------------------------
+int menu_wstepne()
+{
+    int wybor1, iduzytkownika;
+    do
+    {
+        vector<uzytkownik> uzytkownicy;
+        fstream plik;
+        string linia, login, haslo;
+        plik.open("Uzytkownicy.txt", ios::in);
+        int nr_linii=1;
 
+        while(getline(plik,linia))
+        {
+            cout<<linia<<endl;
+            nr_linii++;
+        }
+
+        plik.close();
+        int ilosc = nr_linii-1;
+        if (ilosc!=0) przypisanie_uz(uzytkownicy);
+
+        system("CLS");
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),13);
+        cout << endl << "WITAMY W PROGRAMIE 'LOOK LOOK - ADRESS BOOK'"<<endl;
+        cout << "------------------------------------------"<<endl;
+        cout << "1. Rejestracja "<<endl;
+        cout << "2. Logowanie"<<endl;
+        cout << "9. Wyjdz z programu "<<endl;
+        cout << "------------------------------------------"<<endl;
+        cout << "Wybor: ";
+        cin >> wybor1;
+
+        switch (wybor1)
+        {
+        case 1:
+            rejestracja(uzytkownicy, ilosc);
+            break;
+
+        case 2:
+            iduzytkownika = logowanie(uzytkownicy, ilosc);
+            break;
+        case 9:
+            exit(0);
+        }
+    }
+    while ((wybor1 == 1)||(iduzytkownika==-1));
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
+    return iduzytkownika;
+}
+//------------------------------------------------------------------------
 void wyswietl(vector<przyjaciel>& kontakty, int numerro)
 {
-    cout<<kontakty[numerro].id<<". "<<kontakty[numerro].imie<<" | "<<kontakty[numerro].nazwisko<<" | "<<kontakty[numerro].adres<<" | "<<kontakty[numerro].numer<<endl;
+    cout<<kontakty[numerro].id<<". "<<kontakty[numerro].iduzytkownika<< " | "<<kontakty[numerro].imie<<" | "<<kontakty[numerro].nazwisko<<" | "<<kontakty[numerro].adres<<" | "<<kontakty[numerro].numer<<endl;
 }
 //------------------------------------------------------------------------
 
-void przypisanie(vector<przyjaciel>& kontakty)
+int przypisanie(vector<przyjaciel>& kontakty, int idduzytk)
 {
-    string imiee, nazwiskoo,adress,numerr, idd;
+    string imiee, nazwiskoo,adress,numerr, idd, idduz;
     fstream plik;
     plik.open("Kontakty.txt", ios::in);
     int nr=0;
-
-    while(getline(plik,idd,'.')&&getline(plik,imiee,'|')&&getline(plik,nazwiskoo,'|')&&getline(plik,adress,'|')&&getline(plik,numerr,'|'))
+    int ostatni_id;
+    while(getline(plik,idd,'.')&&getline(plik,idduz,'|')&&getline(plik,imiee,'|')&&getline(plik,nazwiskoo,'|')&&getline(plik,adress,'|')&&getline(plik,numerr,'|'))
     {
-        kontakty.push_back(przyjaciel());
-        kontakty[nr].id=stoi(idd);
-        kontakty[nr].imie=imiee;
-        kontakty[nr].nazwisko=nazwiskoo;
-        kontakty[nr].adres=adress;
-        kontakty[nr].numer=numerr;
-        nr++;
+        if (stoi(idduz)==idduzytk)
+        {
+            kontakty.push_back(przyjaciel());
+            kontakty[nr].id=stoi(idd);
+            kontakty[nr].iduzytkownika=stoi(idduz);
+            kontakty[nr].imie=imiee;
+            kontakty[nr].nazwisko=nazwiskoo;
+            kontakty[nr].adres=adress;
+            kontakty[nr].numer=numerr;
+            nr++;
+        }
+        ostatni_id=stoi(idd);
     }
+    return ostatni_id;
 }
 //------------------------------------------------------------------------
 
-void dodaj(vector<przyjaciel>& kontakty,int ilosc)
+void dodaj(vector<przyjaciel>& kontakty,int ilosc, int iduzytk, int ost_id)
 {
     string imiee, nazwiskoo,adress,numerr;
     int idd;
+    int idduz=iduzytk;
     if (ilosc!=0)
     {
-        idd=kontakty[ilosc-1].id+1;
+        idd=ost_id+1;
     }
     else
     {
@@ -97,7 +266,7 @@ void dodaj(vector<przyjaciel>& kontakty,int ilosc)
     fstream plik;
     plik.open("Kontakty.txt", ios::out | ios::app); //otwarcie pliku do zapisu
     if (ilosc!=0) plik<<endl;
-    plik<<idd<<"."<<imiee<<"|"<<nazwiskoo<<"|"<<adress<<"|"<<numerr<<"|";
+    plik<<idd<<"."<<idduz<<"|"<<imiee<<"|"<<nazwiskoo<<"|"<<adress<<"|"<<numerr<<"|";
     plik.close();
     cout<<"Zapisywanie...";
     Sleep(1000);
@@ -105,13 +274,13 @@ void dodaj(vector<przyjaciel>& kontakty,int ilosc)
 
 //------------------------------------------------------------------------
 
-void szukaj_imie(vector<przyjaciel>& kontakty, int ilosc)
+void szukaj_imie(vector<przyjaciel>& kontakty)
 {
     string szuk_imie;
     cin.sync();
     cout<<"Podaj szukane imie: ";
     cin>>szuk_imie;
-    for (int j=0;j<ilosc;j++)
+    for (int j=0;j<kontakty.size();j++)
     {
         if (kontakty[j].imie==szuk_imie)
         {
@@ -122,13 +291,13 @@ void szukaj_imie(vector<przyjaciel>& kontakty, int ilosc)
 }
 //------------------------------------------------------------------------
 
-void szukaj_nazwisko(vector<przyjaciel>& kontakty, int ilosc)
+void szukaj_nazwisko(vector<przyjaciel>& kontakty)
 {
     string szuk_nazw;
     cin.sync();
     cout<<"Podaj szukane nazwisko: ";
     cin>>szuk_nazw;
-    for (int j=0; j<ilosc; j++)
+    for (int j=0; j<kontakty.size(); j++)
     {
         if (kontakty[j].nazwisko==szuk_nazw)
         {
@@ -156,12 +325,13 @@ void zapisdopliku(string pozycjaedytowana, string findid, int numerpozycji)
             int position = linia.find('|');
             int position2 = linia.find('|', position+1);
             int position3 = linia.find('|', position2+1);
+            int position4 = linia.find('|', position3+1);
 
             if (findid==idd)
             {
-                if (numerpozycji==2) linia.replace(linia.find(pozycjaedytowana, position),pozycjaedytowana.length(),nowa_pozycja);
-                else if (numerpozycji==3)linia.replace(linia.find(pozycjaedytowana, position2+1),pozycjaedytowana.length(),nowa_pozycja);
-                else if (numerpozycji==4)linia.replace(linia.find(pozycjaedytowana, position3+1),pozycjaedytowana.length(),nowa_pozycja);
+                if (numerpozycji==2) linia.replace(linia.find(pozycjaedytowana, position2),pozycjaedytowana.length(),nowa_pozycja);
+                else if (numerpozycji==3)linia.replace(linia.find(pozycjaedytowana, position3+1),pozycjaedytowana.length(),nowa_pozycja);
+                else if (numerpozycji==4)linia.replace(linia.find(pozycjaedytowana, position4+1),pozycjaedytowana.length(),nowa_pozycja);
                 else linia.replace(linia.find(pozycjaedytowana),pozycjaedytowana.length(),nowa_pozycja);
             }
 
@@ -179,7 +349,7 @@ void zapisdopliku(string pozycjaedytowana, string findid, int numerpozycji)
 
 //------------------------------------------------------------------------
 
-void edytuj_kontakt(vector<przyjaciel>& kontakty, int ilosc)
+void edytuj_kontakt(vector<przyjaciel>& kontakty)
 {
     string foundstatement;
     int szuk_id,position;
@@ -187,7 +357,7 @@ void edytuj_kontakt(vector<przyjaciel>& kontakty, int ilosc)
     cin.sync();
     cout<<endl<<"Podaj ID kontaktu, ktory chcesz zedytowac: ";
     cin>>szuk_id;
-    for (int j=0; j<ilosc; j++)
+    for (int j=0; j<kontakty.size(); j++)
     {
         if (kontakty[j].id==szuk_id)
         {
@@ -269,7 +439,7 @@ void edytuj_kontakt(vector<przyjaciel>& kontakty, int ilosc)
 //------------------------------------------------------------------------
 
 
-void usun_kontakt(vector<przyjaciel>& kontakty, int ilosc)
+void usun_kontakt(vector<przyjaciel>& kontakty, int ostatni_id)
 {
     string foundstatement;
     int szuk_id,position;
@@ -277,7 +447,7 @@ void usun_kontakt(vector<przyjaciel>& kontakty, int ilosc)
     cin.sync();
     cout<<endl<<"Podaj ID kontaktu, ktory chcesz usunac: ";
     cin>>szuk_id;
-    for (int j=0; j<ilosc; j++)
+    for (int j=0; j<kontakty.size(); j++)
     {
         if (kontakty[j].id==szuk_id)
         {
@@ -316,7 +486,7 @@ void usun_kontakt(vector<przyjaciel>& kontakty, int ilosc)
         if (findid!=idd)
         {
             temp << linia;
-            if ((stoi(idd)==kontakty[ilosc-2].id)&&(stoi(findid)==kontakty[ilosc-1].id));
+            if ((stoi(idd)==(ostatni_id-1))&&(stoi(findid)==ostatni_id));
             else if (!plik.eof()) temp<<endl;
         }
     }
@@ -331,12 +501,22 @@ void usun_kontakt(vector<przyjaciel>& kontakty, int ilosc)
 //------------------------------------------------------------------------
 int main()
 {
-    int wybor;
+    int iduzytkownika = menu_wstepne();
+    int wybor, ost_id;
     do
     {
         vector<przyjaciel> kontakty;
-        int ilosc=wyswietl_ksiazke();
-        if (ilosc!=0) przypisanie(kontakty);
+        int ilosc=oblicz_ilosc;
+        if (ilosc!=0)
+        {
+            ost_id=przypisanie(kontakty, iduzytkownika);
+        }
+        else
+        {
+            ost_id=0;
+        }
+        wyswietl_ksiazke(kontakty, iduzytkownika);
+
         cout << "MENU GLOWNE KSIAZKI ADRESOWEJ:"<<endl;
         cout << "------------------------------------------"<<endl;
         cout << "1. Dodaj kontakt "<<endl;
@@ -352,11 +532,11 @@ int main()
         switch (wybor)
         {
         case 1:
-            dodaj(kontakty,ilosc);
+            dodaj(kontakty,ilosc, iduzytkownika, ost_id);
             break;
 
         case 2:
-            if (ilosc!=0) szukaj_imie(kontakty,ilosc);
+            if (kontakty.size()!=0) szukaj_imie(kontakty);
             else
             {
                 cout<< "Lista kontaktow jest pusta. Najpierw dodaj pozycje...";
@@ -365,7 +545,7 @@ int main()
             break;
 
         case 3:
-            if (ilosc!=0) szukaj_nazwisko(kontakty,ilosc);
+            if (kontakty.size()!=0) szukaj_nazwisko(kontakty);
             else
             {
                 cout<< "Lista kontaktow jest pusta. Najpierw dodaj pozycje...";
@@ -373,7 +553,7 @@ int main()
             }
             break;
         case 4:
-            if (ilosc!=0) edytuj_kontakt(kontakty,ilosc);
+            if (kontakty.size()!=0) edytuj_kontakt(kontakty);
             else
             {
                 cout<< "Lista kontaktow jest pusta. Najpierw dodaj pozycje...";
@@ -381,7 +561,7 @@ int main()
             }
             break;
         case 5:
-            if (ilosc!=0) usun_kontakt(kontakty,ilosc);
+            if (kontakty.size()!=0) usun_kontakt(kontakty, ost_id);
             else
             {
                 cout<< "Lista kontaktow jest pusta. Najpierw dodaj pozycje...";
