@@ -111,12 +111,16 @@ int logowanie(vector<uzytkownik>& uzytkownicy, int ilosc)
     }
     if (zmienna!=0)
     {
-        cout<<"Login lub haslo nieprawidlowe!"<<endl<<"Nacisnij dowolony klawisz aby wrocic do glownego menu";
+        cout<<"Login lub haslo nieprawidlowe!"<<endl<<endl<<"Nacisnij dowolony klawisz aby wrocic do glownego menu"<<endl;
         getchar();getchar();
         return -1;
     }
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
-    cout<< "Witaj "<<login<<" w Twojej ksiazce adresowej. Nacisnij dowolny klawisz zeby wyswietlic menu...";
+    cout<< "Witaj ";
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),10);
+    cout<<login;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
+    cout<<" w Twojej ksiazce adresowej. "<<endl<<endl<<"Nacisnij dowolny klawisz zeby wyswietlic menu...";
     getchar();getchar();
     return id;
 
@@ -506,7 +510,7 @@ int main()
     do
     {
         vector<przyjaciel> kontakty;
-        int ilosc=oblicz_ilosc;
+        int ilosc=oblicz_ilosc();
         if (ilosc!=0)
         {
             ost_id=przypisanie(kontakty, iduzytkownika);
