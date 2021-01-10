@@ -126,7 +126,7 @@ int logowanie(vector<uzytkownik>& uzytkownicy, int ilosc)
 
 }
 //------------------------------------------------------------------------
-int wyswietl_ksiazke(vector<przyjaciel>& kontakty, int iduz)
+int wyswietl_ksiazke(vector<przyjaciel>& kontakty, int iduz, string showhide)
 {
     system("CLS");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),11);
@@ -136,11 +136,14 @@ int wyswietl_ksiazke(vector<przyjaciel>& kontakty, int iduz)
     cout<<"------------------------------------------------"<<endl;
     cout<<"  IMIE  |  NAZWISKO  |  ADRES  |  NR TELEFONU"<<endl;
     cout<<"------------------------------------------------"<<endl;
-
-    for (int i=0; i<kontakty.size(); i++)
+    if (showhide!="hide")
     {
-        cout<<kontakty[i].id<<"."<<kontakty[i].iduzytkownika<<"|"<<kontakty[i].imie<<"|"<<kontakty[i].nazwisko<<"|"<<kontakty[i].adres<<"|"<<kontakty[i].numer<<"|"<<endl;
+        for (int i=0; i<kontakty.size(); i++)
+        {
+            cout<<kontakty[i].id<<"."<<kontakty[i].iduzytkownika<<"|"<<kontakty[i].imie<<"|"<<kontakty[i].nazwisko<<"|"<<kontakty[i].adres<<"|"<<kontakty[i].numer<<"|"<<endl;
+        }
     }
+
     cout << "------------------------------------------------"<<endl<<endl;
 
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
@@ -163,12 +166,12 @@ int oblicz_ilosc()
     return nr_linii-1;
 }
 //------------------------------------------------------------------------
-int menu_wstepne()
+int menu_wstepne(vector<uzytkownik>& uzytkownicy)
 {
     int wybor1, iduzytkownika;
     do
     {
-        vector<uzytkownik> uzytkownicy;
+
         fstream plik;
         string linia, login, haslo;
         plik.open("Uzytkownicy.txt", ios::in);
@@ -503,10 +506,60 @@ void usun_kontakt(vector<przyjaciel>& kontakty, int ostatni_id)
 
 }
 //------------------------------------------------------------------------
+
+void zmiana_hasla(int iduz, vector<uzytkownik>& uzytkownicy)
+{
+    string starehaslo, nowehaslo, powtorka, nazwa, linia, idd;
+    for (int i=0; i<uzytkownicy.size(); i++)
+    {
+        if (uzytkownicy[i].iduz==iduz)
+        {
+            starehaslo=uzytkownicy[i].haslo;
+            nazwa=uzytkownicy[i].login;
+        }
+    }
+    do
+    {
+        system("CLS");
+        cout<<"Funkcja zmiany hasla uzytkownika: "<<nazwa <<endl<<endl<<"Wprowadz nowe haslo: ";
+        cin>>nowehaslo;
+        cout<<endl<<"Powtorz nowe haslo: ";
+        cin>>powtorka;
+    }while(powtorka != nowehaslo);
+    fstream plik;
+    plik.open("Uzytkownicy.txt", ios::in);
+    fstream temp;
+    temp.open("temp.txt", ios::out | ios::app);
+    while(getline(plik,linia))
+    {
+        idd=linia.substr(0,linia.find("."));
+        if (idd==to_string(iduz))
+        {
+            linia.replace(linia.find("|")+1,starehaslo.length(),nowehaslo);
+        }
+
+        temp << linia;
+        if (!plik.eof()) temp<<endl;
+    }
+    temp.close();
+    plik.close();
+    remove("Uzytkownicy.txt");
+    rename("temp.txt","Uzytkownicy.txt");
+    przypisanie_uz(uzytkownicy);
+    cout<<"Zapisywanie...";
+    Sleep(2000);
+
+
+
+    przypisanie_uz(uzytkownicy);
+}
+//------------------------------------------------------------------------
 int main()
 {
-    int iduzytkownika = menu_wstepne();
+    vector<uzytkownik> uzytkownicy;
+    int iduzytkownika = menu_wstepne(uzytkownicy);
     int wybor, ost_id;
+    string showhide="hide";
     do
     {
         vector<przyjaciel> kontakty;
@@ -519,15 +572,17 @@ int main()
         {
             ost_id=0;
         }
-        wyswietl_ksiazke(kontakty, iduzytkownika);
+        wyswietl_ksiazke(kontakty, iduzytkownika, showhide);
 
         cout << "MENU GLOWNE KSIAZKI ADRESOWEJ:"<<endl;
         cout << "------------------------------------------"<<endl;
+        cout << "0. Pokaz/ukryj kontakty "<<endl;
         cout << "1. Dodaj kontakt "<<endl;
         cout << "2. Wyszukaj kontakt po imieniu "<<endl;
         cout << "3. Wyszukaj kontakt po nazwisku "<<endl;
         cout << "4. Edytuj kontakt "<<endl;
         cout << "5. Usun kontakt "<<endl;
+        cout << "6. Zmien haslo "<<endl;
         cout << "9. Koniec programu "<<endl;
         cout << "------------------------------------------"<<endl;
         cout << "Wybor: ";
@@ -535,6 +590,10 @@ int main()
 
         switch (wybor)
         {
+        case 0:
+            if(showhide=="hide") showhide="show";
+            else if (showhide=="show") showhide="hide";
+            break;
         case 1:
             dodaj(kontakty,ilosc, iduzytkownika, ost_id);
             break;
@@ -571,6 +630,9 @@ int main()
                 cout<< "Lista kontaktow jest pusta. Najpierw dodaj pozycje...";
                 Sleep(3000);
             }
+            break;
+        case 6:
+            zmiana_hasla(iduzytkownika, uzytkownicy);
             break;
         }
     }
