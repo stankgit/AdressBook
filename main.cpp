@@ -556,6 +556,7 @@ void zmiana_hasla(int iduz, vector<uzytkownik>& uzytkownicy)
 //------------------------------------------------------------------------
 int main()
 {
+repeat:
     vector<uzytkownik> uzytkownicy;
     int iduzytkownika = menu_wstepne(uzytkownicy);
     int wybor, ost_id;
@@ -583,6 +584,7 @@ int main()
         cout << "4. Edytuj kontakt "<<endl;
         cout << "5. Usun kontakt "<<endl;
         cout << "6. Zmien haslo "<<endl;
+        cout << "7. Wyloguj "<<endl;
         cout << "9. Koniec programu "<<endl;
         cout << "------------------------------------------"<<endl;
         cout << "Wybor: ";
@@ -636,7 +638,8 @@ int main()
             break;
         }
     }
-    while (wybor != 9);
+    while ((wybor != 9)&&(wybor != 7));
+    if (wybor == 7) goto repeat;
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),10);
     cout<<endl << "---------------------------------------------------------------------------";
     cout<<endl<< "DZIEKUJEMY ZA KORZYSTANIE Z APLIKACJI KSIAZKI ADRESOWEJ. ZAPRASZAMY PONOWNIE!"<<endl;
