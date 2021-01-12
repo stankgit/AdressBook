@@ -209,6 +209,11 @@ int menu_wstepne(vector<uzytkownik>& uzytkownicy)
             break;
         case 9:
             exit(0);
+        default:
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),10);
+            cout<<"Wybrales niewlasciwa opcje! Program zakonczy swoje dzialanie!"<<endl;
+            getchar();getchar();
+            exit(0);
         }
     }
     while ((wybor1 == 1)||(iduzytkownika==-1));
