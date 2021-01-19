@@ -40,6 +40,32 @@ void przypisanie_uz(vector<uzytkownik>& uzytkownicy)
     }
 }
 //------------------------------------------------------------------------
+void empty_line_clear(int linesnumber)
+{
+    string line;
+    fstream plik;
+    plik.open("Kontakty.txt", ios::in);
+    fstream temp;
+    temp.open("temp.txt", ios::out | ios::app);
+    int nrline=0;
+    while(getline(plik,line))
+    {
+        if(line.empty());
+        else
+        {
+            temp<<line;
+            nrline++;
+            if (nrline!=linesnumber) temp<<endl;
+
+        }
+    }
+    temp.close();
+    plik.close();
+    remove("Kontakty.txt");
+    rename("temp.txt","Kontakty.txt");
+}
+
+//------------------------------------------------------------------------
 
 void rejestracja(vector<uzytkownik>& uzytkownicy, int ilosc)
 {
@@ -486,31 +512,36 @@ void usun_kontakt(vector<przyjaciel>& kontakty, int ostatni_id)
         Sleep(3500);
         return;
     }
-    string findid = to_string(kontakty[position].id);
+    string findid = std::to_string(kontakty[position].id);
+    int intfindid= stoi(findid);
     string linia, idd;
     fstream plik;
     plik.open("Kontakty.txt", ios::in);
     fstream temp;
     temp.open("temp.txt", ios::out | ios::app);
+    int numbline=0;
     while(getline(plik,linia))
     {
         idd=linia.substr(0,linia.find("."));
+        int intid = stoi(idd);
         if (findid!=idd)
         {
             temp << linia;
-            if ((stoi(idd)==(ostatni_id-1))&&(stoi(findid)==ostatni_id));
-            else if (!plik.eof()) temp<<endl;
+            numbline++;
+            if (!plik.eof()) temp<<endl;
         }
     }
     temp.close();
     plik.close();
     remove("Kontakty.txt");
     rename("temp.txt","Kontakty.txt");
+    if (intfindid==ostatni_id) empty_line_clear(numbline);
     cout<<"Zapisywanie...";
     Sleep(2000);
 
 }
 //------------------------------------------------------------------------
+
 
 void zmiana_hasla(int iduz, vector<uzytkownik>& uzytkownicy)
 {
