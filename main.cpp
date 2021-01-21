@@ -234,12 +234,15 @@ int menu_wstepne(vector<uzytkownik>& uzytkownicy)
             iduzytkownika = logowanie(uzytkownicy, ilosc);
             break;
         case 9:
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),10);
+            cout<<endl << "---------------------------------------------------------------------------";
+            cout<<endl<< "DZIEKUJEMY ZA KORZYSTANIE Z APLIKACJI KSIAZKI ADRESOWEJ. ZAPRASZAMY PONOWNIE!"<<endl;
+            cout << "---------------------------------------------------------------------------"<<endl;
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
             exit(0);
         default:
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),10);
-            cout<<"Wybrales niewlasciwa opcje! Program zakonczy swoje dzialanie!"<<endl;
-            getchar();getchar();
-            exit(0);
+            wybor1=1;
+            break;
         }
     }
     while ((wybor1 == 1)||(iduzytkownika==-1));
